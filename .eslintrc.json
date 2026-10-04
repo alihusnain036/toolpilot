@@ -1,0 +1,78 @@
+{
+  "root": true,
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "plugins": ["@typescript-eslint"],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
+    ],
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/consistent-type-imports": [
+      "error",
+      { "prefer": "type-imports", "fixStyle": "inline-type-imports" }
+    ],
+
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "next/headers",
+            "message": "ToolPilot v1 is statically generated with no backend. next/headers forces per-request server rendering."
+          }
+        ],
+        "patterns": [
+          {
+            "group": ["next/headers", "next/headers/*"],
+            "message": "ToolPilot v1 is statically generated with no backend. next/headers forces per-request server rendering."
+          }
+        ]
+      }
+    ],
+
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[id.name='dynamic'] > Literal[value='force-dynamic']",
+        "message": "ToolPilot v1 has no backend: every route must be statically generated. Remove `export const dynamic = 'force-dynamic'`."
+      },
+      {
+        "selector": "ExportNamedDeclaration > VariableDeclaration > VariableDeclarator[id.name='runtime']",
+        "message": "ToolPilot v1 has no server runtime: remove `export const runtime`."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx", "vitest.setup.ts"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    },
+    {
+      "files": ["scripts/**/*.mjs", "*.config.mjs"],
+      "parser": "espree",
+      "parserOptions": { "ecmaVersion": 2022, "sourceType": "module" },
+      "rules": {
+        "@typescript-eslint/consistent-type-imports": "off",
+        "@typescript-eslint/no-unused-vars": "off"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "node_modules/",
+    ".next/",
+    "out/",
+    "coverage/",
+    "next-env.d.ts"
+  ]
+}
