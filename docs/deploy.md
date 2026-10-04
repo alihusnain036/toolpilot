@@ -15,10 +15,10 @@ CI (`.github/workflows/ci.yml`) is the gate and Vercel is the deployer. They are
 deliberately separate: CI never holds a deployment token, and Vercel builds from
 the git repository itself.
 
-| Trigger                    | What Vercel does                                      |
-| -------------------------- | ----------------------------------------------------- |
-| Push to any branch, or a PR | Builds a **Preview** deployment at a unique URL       |
-| Push to `main`             | Builds and promotes a **Production** deployment       |
+| Trigger                     | What Vercel does                                |
+| --------------------------- | ----------------------------------------------- |
+| Push to any branch, or a PR | Builds a **Preview** deployment at a unique URL |
+| Push to `main`              | Builds and promotes a **Production** deployment |
 
 Both are served over HTTPS with the headers below. Vercel terminates TLS and
 redirects HTTP to HTTPS; nothing in the app needs to do that.
@@ -37,9 +37,9 @@ redirects HTTP to HTTPS; nothing in the app needs to do that.
 3. **Set the one environment variable** in
    _Project → Settings → Environment Variables_:
 
-   | Variable               | Environment | Value                        |
-   | ---------------------- | ----------- | ---------------------------- |
-   | `NEXT_PUBLIC_SITE_URL` | Production  | `https://<production-domain>` |
+   | Variable               | Environment | Value                             |
+   | ---------------------- | ----------- | --------------------------------- |
+   | `NEXT_PUBLIC_SITE_URL` | Production  | `https://<production-domain>`     |
    | `NEXT_PUBLIC_SITE_URL` | Preview     | `https://$VERCEL_URL` — see below |
 
    For Preview, Vercel offers a system environment variable

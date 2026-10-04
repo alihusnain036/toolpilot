@@ -174,7 +174,8 @@ const PATH_RULES = [
   {
     name: 'Next.js route handler',
     why: 'A route handler is an API endpoint. v1 has no backend; there is nothing for it to do.',
-    test: (file) => /^(?:src\/)?app\/.*\/?route\.(?:ts|tsx|js|jsx|mjs)$/.test(file),
+    test: (file) =>
+      /^(?:src\/)?app\/.*\/?route\.(?:ts|tsx|js|jsx|mjs)$/.test(file),
   },
   {
     name: 'Next.js pages API route',
@@ -237,12 +238,16 @@ function trackedFiles() {
     return walk(repoRoot, '');
   }
   try {
-    const output = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z'], {
-      cwd: repoRoot,
-      encoding: 'utf8',
-      maxBuffer: 32 * 1024 * 1024,
-      stdio: ['ignore', 'pipe', 'ignore'],
-    });
+    const output = execFileSync(
+      'git',
+      ['ls-files', '--cached', '--others', '--exclude-standard', '-z'],
+      {
+        cwd: repoRoot,
+        encoding: 'utf8',
+        maxBuffer: 32 * 1024 * 1024,
+        stdio: ['ignore', 'pipe', 'ignore'],
+      },
+    );
     return [...new Set(output.split('\0').filter(Boolean))];
   } catch {
     return walk(repoRoot, '');
@@ -272,7 +277,11 @@ function checkPackageJson(violations) {
   if (!existsSync(pkgPath)) return;
 
   const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
-  for (const field of ['dependencies', 'devDependencies', 'optionalDependencies']) {
+  for (const field of [
+    'dependencies',
+    'devDependencies',
+    'optionalDependencies',
+  ]) {
     for (const name of Object.keys(pkg[field] ?? {})) {
       if (FORBIDDEN_MODULES.includes(name)) {
         violations.push({

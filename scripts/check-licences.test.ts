@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 // @ts-expect-error -- a plain .mjs script with no type declarations of its own.
-import { ALLOWED, EXCEPTIONS, evaluateExpression, verdictFor } from './check-licences.mjs';
+import {
+  ALLOWED,
+  EXCEPTIONS,
+  evaluateExpression,
+  verdictFor,
+} from './check-licences.mjs';
 
 /**
  * Unit tests for the licence check's decision logic.
@@ -87,7 +92,9 @@ describe('verdictFor', () => {
   });
 
   it('disallows a package whose licence is not, with no exception', () => {
-    expect(verdictFor('some-gpl-package', 'GPL-3.0').outcome).toBe('disallowed');
+    expect(verdictFor('some-gpl-package', 'GPL-3.0').outcome).toBe(
+      'disallowed',
+    );
   });
 
   it('clears a package named by a recorded exception at that exact licence', () => {
@@ -103,7 +110,9 @@ describe('verdictFor', () => {
   });
 
   it('does not let an exception cover a different package', () => {
-    expect(verdictFor('something-else', 'CC-BY-4.0').outcome).toBe('disallowed');
+    expect(verdictFor('something-else', 'CC-BY-4.0').outcome).toBe(
+      'disallowed',
+    );
   });
 
   it('gives every exception a written reason a reviewer can check', () => {

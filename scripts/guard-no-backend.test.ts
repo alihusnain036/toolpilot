@@ -142,7 +142,8 @@ describe('no-backend guard', () => {
   it('fails when an upload handler is imported', () => {
     const { code, output } = runGuard({
       ...CLEAN,
-      'src/lib/upload.ts': "const multer = require('multer');\nexport default multer;\n",
+      'src/lib/upload.ts':
+        "const multer = require('multer');\nexport default multer;\n",
     });
     expect(code).toBe(1);
     expect(output).toContain('multer');

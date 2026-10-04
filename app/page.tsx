@@ -11,9 +11,9 @@ export const metadata: Metadata = {
  */
 export default function HomePage(): React.JSX.Element {
   return (
-    <div className="max-w-content mx-auto px-gutter py-section">
+    <div className="mx-auto max-w-content px-gutter py-section">
       <h1 className="text-4xl font-semibold tracking-tight">ToolPilot</h1>
-      <p className="text-muted-foreground mt-stack max-w-prose text-lg">
+      <p className="mt-stack max-w-prose text-lg text-muted-foreground">
         Free, fast online tools that run entirely in your browser. Nothing you
         open is uploaded anywhere.
       </p>

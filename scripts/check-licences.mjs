@@ -134,7 +134,11 @@ function enumerateProductionTree() {
     raw = execFileSync(
       'pnpm',
       ['list', '--prod', '--depth', 'Infinity', '--json'],
-      { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] },
+      {
+        encoding: 'utf8',
+        maxBuffer: 64 * 1024 * 1024,
+        stdio: ['ignore', 'pipe', 'pipe'],
+      },
     );
   } catch (error) {
     console.error(
@@ -274,7 +278,9 @@ async function main() {
         'optional per-platform binaries, nothing of them ships:\n',
     );
     for (const entry of notInstalled) {
-      console.log(`  --   ${`${entry.name}@${entry.version}`.padEnd(nameWidth)}`);
+      console.log(
+        `  --   ${`${entry.name}@${entry.version}`.padEnd(nameWidth)}`,
+      );
     }
   }
 

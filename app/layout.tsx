@@ -48,7 +48,7 @@ export default function RootLayout({
 }): React.JSX.Element {
   return (
     <html lang="en" className={`${fontSans.variable} ${fontMono.variable}`}>
-      <body className="bg-background text-foreground min-h-screen font-sans antialiased">
+      <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         {/*
           The real header, footer and mobile navigation land in the
           site-shell ticket (TKT-3). This placeholder keeps the document

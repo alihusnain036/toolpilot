@@ -14,7 +14,9 @@ describe('parseEnv', () => {
   });
 
   it('strips trailing slashes so callers can concatenate paths safely', () => {
-    const result = parseEnv({ NEXT_PUBLIC_SITE_URL: 'https://toolpilot.app//' });
+    const result = parseEnv({
+      NEXT_PUBLIC_SITE_URL: 'https://toolpilot.app//',
+    });
     expect(result.NEXT_PUBLIC_SITE_URL).toBe('https://toolpilot.app');
   });
 
@@ -29,9 +31,9 @@ describe('parseEnv', () => {
   });
 
   it('throws when NEXT_PUBLIC_SITE_URL is not an absolute URL', () => {
-    expect(() => parseEnv({ NEXT_PUBLIC_SITE_URL: 'toolpilot.app' })).toThrowError(
-      /must be an absolute URL/,
-    );
+    expect(() =>
+      parseEnv({ NEXT_PUBLIC_SITE_URL: 'toolpilot.app' }),
+    ).toThrowError(/must be an absolute URL/);
   });
 
   it('throws when NEXT_PUBLIC_SITE_URL uses an unsupported protocol', () => {
@@ -47,7 +49,9 @@ describe('parseEnv', () => {
   });
 
   it('reports the variable name in the error so the failure is actionable', () => {
-    expect(() => parseEnv({})).toThrowError(/Invalid environment configuration/);
+    expect(() => parseEnv({})).toThrowError(
+      /Invalid environment configuration/,
+    );
   });
 });
 

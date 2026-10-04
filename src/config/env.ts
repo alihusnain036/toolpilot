@@ -23,7 +23,9 @@ const envSchema = z.object({
       invalid_type_error: 'NEXT_PUBLIC_SITE_URL must be a string',
     })
     .min(1, 'NEXT_PUBLIC_SITE_URL must not be empty')
-    .url('NEXT_PUBLIC_SITE_URL must be an absolute URL, e.g. https://toolpilot.app')
+    .url(
+      'NEXT_PUBLIC_SITE_URL must be an absolute URL, e.g. https://toolpilot.app',
+    )
     .refine(
       (value) => {
         try {
@@ -46,7 +48,9 @@ export type Env = z.infer<typeof envSchema>;
  * Exported so the unit test can exercise it directly without reloading the
  * module registry.
  */
-export function parseEnv(source: NodeJS.ProcessEnv | Record<string, unknown>): Env {
+export function parseEnv(
+  source: NodeJS.ProcessEnv | Record<string, unknown>,
+): Env {
   const result = envSchema.safeParse({
     // Referenced as a literal property so Next's build-time inlining of
     // `process.env.NEXT_PUBLIC_*` still applies in client bundles.
@@ -55,7 +59,9 @@ export function parseEnv(source: NodeJS.ProcessEnv | Record<string, unknown>): E
 
   if (!result.success) {
     const problems = result.error.issues
-      .map((issue) => `  - ${issue.path.join('.') || '(root)'}: ${issue.message}`)
+      .map(
+        (issue) => `  - ${issue.path.join('.') || '(root)'}: ${issue.message}`,
+      )
       .join('\n');
 
     throw new Error(
