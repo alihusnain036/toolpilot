@@ -14,18 +14,20 @@ import RootLayout, { metadata, viewport } from './layout';
  * warning for that; it is expected here and nowhere else, so we silence it for
  * this file only rather than globally.
  */
+const realConsoleError = console.error.bind(console);
 let consoleError: ReturnType<typeof vi.spyOn>;
 
 beforeAll(() => {
-  consoleError = vi.spyOn(console, 'error').mockImplementation((...args) => {
-    const first = typeof args[0] === 'string' ? args[0] : '';
-    if (first.includes('cannot be a child of') || first.includes('<html>')) {
-      return;
-    }
-    // Anything else is a real problem: let it through.
-    consoleError.getMockImplementation();
-    process.stderr.write(`${first}\n`);
-  });
+  consoleError = vi
+    .spyOn(console, 'error')
+    .mockImplementation((...args: unknown[]) => {
+      const first = typeof args[0] === 'string' ? args[0] : '';
+      if (first.includes('validateDOMNesting')) {
+        return;
+      }
+      // Anything else is a real problem: let it through.
+      realConsoleError(...args);
+    });
 });
 
 afterAll(() => {
