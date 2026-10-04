@@ -52,7 +52,11 @@ redirects HTTP to HTTPS; nothing in the app needs to do that.
 
    `src/config/env.ts` validates this variable at module load, so a deploy with
    it missing or malformed fails the build rather than shipping broken canonical
-   URLs. **There are no secrets to set.** v1 has no backend, no API keys and no
+   URLs. A committed `.env` holds `http://localhost:3000` so local work needs no
+   setup, and a production build refuses it: when `VERCEL_ENV` is `production`,
+   a loopback host or a plain-`http` origin fails the build. Forgetting to set
+   this variable for Production therefore stops the deploy instead of quietly
+   publishing localhost URLs. **There are no secrets to set.** v1 has no backend, no API keys and no
    credentials of any kind; if a future change needs one, it does not belong in
    a `NEXT_PUBLIC_*` variable, because Next inlines those into the public bundle.
 

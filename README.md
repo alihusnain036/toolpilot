@@ -30,8 +30,12 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 This is the only environment variable the project has, and it is not a secret —
 it is the site's own public URL, used for canonical links and metadata.
 `src/config/env.ts` validates it at module load, so a missing or malformed value
-fails the build instead of shipping broken URLs. **There are no secrets in this
-project.** If one is ever needed, it does not belong in a `NEXT_PUBLIC_*`
+fails the build instead of shipping broken URLs. The committed `.env` is a
+convenience for local work, and it is deliberately not allowed to stand in for
+the real thing: when Vercel builds with `VERCEL_ENV=production`, a localhost or
+plain-`http` value is rejected, so a production deploy with the variable unset
+fails loudly instead of shipping localhost canonical URLs. **There are no
+secrets in this project.** If one is ever needed, it does not belong in a `NEXT_PUBLIC_*`
 variable, because Next inlines those into the public bundle.
 
 ```sh
@@ -48,7 +52,7 @@ pnpm start   # serve the production build locally
 | `pnpm build`        | **typecheck → lint → `next build`.** A build cannot succeed with a type error or a lint error |
 | `pnpm start`        | Serves the built output                                                                       |
 | `pnpm typecheck`    | `tsc --noEmit` — `strict` plus `noUncheckedIndexedAccess`                                     |
-| `pnpm lint`         | ESLint; any error, and any warning, fails                                                     |
+| `pnpm lint`         | ESLint over `app/`, `src/` and `scripts/`; any error, and any warning, fails                   |
 | `pnpm test`         | Vitest once, over `app/`, `src/` and `scripts/`                                               |
 | `pnpm test:watch`   | Vitest in watch mode                                                                          |
 | `pnpm format`       | Prettier, writing changes (includes Tailwind class sorting)                                   |

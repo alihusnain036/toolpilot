@@ -43,6 +43,22 @@ const envSchema = z.object({
 export type Env = z.infer<typeof envSchema>;
 
 /**
+ * Hosts that are only ever this machine. The committed `.env` holds
+ * `http://localhost:3000` so `pnpm dev` works with no setup — which means a
+ * missing variable in a deploy would otherwise fall back to it silently and
+ * ship localhost canonical URLs, a sitemap nobody can follow and Open Graph
+ * tags that resolve nowhere. Rejecting it for a production deploy is what keeps
+ * "the build fails if this is not set" true where it matters.
+ */
+const LOOPBACK_HOSTS = new Set([
+  'localhost',
+  '127.0.0.1',
+  '0.0.0.0',
+  '[::1]',
+  '::1',
+]);
+
+/**
  * Parses the environment, or throws an error naming every problem found.
  *
  * Exported so the unit test can exercise it directly without reloading the
@@ -71,11 +87,35 @@ export function parseEnv(
     );
   }
 
+  // Vercel sets VERCEL_ENV in the build container ('production', 'preview' or
+  // 'development'). It is absent locally and in CI, so this only ever tightens
+  // the real production build; a preview pointing at its own hostname, or at
+  // the local default, is harmless.
+  const rawDeploymentEnv = source['VERCEL_ENV'];
+  const deploymentEnv =
+    typeof rawDeploymentEnv === 'string' ? rawDeploymentEnv : undefined;
+  if (deploymentEnv === 'production') {
+    const { protocol, hostname } = new URL(result.data.NEXT_PUBLIC_SITE_URL);
+    if (protocol !== 'https:' || LOOPBACK_HOSTS.has(hostname)) {
+      throw new Error(
+        'Invalid environment configuration:\n' +
+          `  - NEXT_PUBLIC_SITE_URL is "${result.data.NEXT_PUBLIC_SITE_URL}", ` +
+          'which is not a public https origin.\n\n' +
+          'A production deploy must set NEXT_PUBLIC_SITE_URL to the site’s ' +
+          'real https URL in the Vercel project settings; the value committed in ' +
+          '.env is a local default only. See docs/deploy.md.',
+      );
+    }
+  }
+
   return result.data;
 }
 
 export const env: Env = parseEnv({
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+  // Not inlined into the client bundle (no NEXT_PUBLIC_ prefix), so this is
+  // `undefined` in the browser and the check above is a build-time one only.
+  VERCEL_ENV: process.env.VERCEL_ENV,
 });
 
 /** Origin the site is served from, with any trailing slash removed. */

@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "next dev",
     "typecheck": "tsc --noEmit",
-    "lint": "next lint --max-warnings=0",
+    "lint": "next lint --max-warnings=0 --dir app --dir src --dir scripts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",

@@ -48,6 +48,45 @@ describe('parseEnv', () => {
     );
   });
 
+  it('rejects the committed localhost default in a production deploy', () => {
+    // The committed .env exists so `pnpm dev` needs no setup. If a production
+    // deploy is missing the variable it would otherwise inherit that default
+    // and ship localhost canonical URLs; this is what stops it.
+    expect(() =>
+      parseEnv({
+        NEXT_PUBLIC_SITE_URL: 'http://localhost:3000',
+        VERCEL_ENV: 'production',
+      }),
+    ).toThrowError(/not a public https origin/);
+  });
+
+  it('rejects a plain-http origin in a production deploy', () => {
+    expect(() =>
+      parseEnv({
+        NEXT_PUBLIC_SITE_URL: 'http://toolpilot.app',
+        VERCEL_ENV: 'production',
+      }),
+    ).toThrowError(/not a public https origin/);
+  });
+
+  it('accepts a public https origin in a production deploy', () => {
+    const result = parseEnv({
+      NEXT_PUBLIC_SITE_URL: 'https://toolpilot.app',
+      VERCEL_ENV: 'production',
+    });
+    expect(result.NEXT_PUBLIC_SITE_URL).toBe('https://toolpilot.app');
+  });
+
+  it('leaves preview and local builds free to use any valid URL', () => {
+    for (const vercelEnv of ['preview', 'development', undefined]) {
+      const result = parseEnv({
+        NEXT_PUBLIC_SITE_URL: 'http://localhost:3000',
+        VERCEL_ENV: vercelEnv,
+      });
+      expect(result.NEXT_PUBLIC_SITE_URL).toBe('http://localhost:3000');
+    }
+  });
+
   it('reports the variable name in the error so the failure is actionable', () => {
     expect(() => parseEnv({})).toThrowError(
       /Invalid environment configuration/,
