@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
+// A namespace import, destructured below, so that the directive stays on the
+// same line as the specifier it suppresses — Prettier would otherwise wrap a
+// named import across lines and leave the directive pointing at nothing.
 // @ts-expect-error -- a plain .mjs script with no type declarations of its own.
-import {
-  ALLOWED,
-  EXCEPTIONS,
-  evaluateExpression,
-  verdictFor,
-} from './check-licences.mjs';
+import * as licenceCheck from './check-licences.mjs';
+
+const { ALLOWED, EXCEPTIONS, evaluateExpression, verdictFor } = licenceCheck;
 
 /**
  * Unit tests for the licence check's decision logic.
