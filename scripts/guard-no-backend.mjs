@@ -14,18 +14,24 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 
-const repoRoot = process.cwd();
+/**
+ * The directory to check. Defaults to the working directory; an explicit root
+ * can be passed as the first argument, which is how the guard's own tests point
+ * it at a fixture tree.
+ */
+const explicitRoot = process.argv[2];
+const repoRoot = path.resolve(explicitRoot ?? process.cwd());
 
 /**
- * Files exempt from the *content* scan. The guard itself and the docs have to
+ * Files exempt from the *content* scan. The guard itself and its tests have to
  * be able to name the things they forbid. Nothing here is application code.
  */
 const CONTENT_SCAN_EXEMPT = new Set([
   'scripts/guard-no-backend.mjs',
-  'scripts/guard-no-backend.test.mjs',
+  'scripts/guard-no-backend.test.ts',
   '.eslintrc.json',
 ]);
 
@@ -202,13 +208,54 @@ function findLines(text, pattern) {
   return hits;
 }
 
+/** Directories never worth descending into. */
+const SKIPPED_DIRECTORIES = new Set([
+  '.git',
+  'node_modules',
+  '.next',
+  'out',
+  'coverage',
+  '.vercel',
+]);
+
+/**
+ * Every file the guard should look at, as repo-relative POSIX paths.
+ *
+ * `git ls-files` is the right answer for a checkout: it sees exactly what would
+ * be pushed and ignores build output. An explicitly named root is walked
+ * instead — it may be a fixture tree or an exported tarball with no index of
+ * its own, and inheriting the surrounding repository's file list would be
+ * wrong. The same walk is the fallback when git is unavailable.
+ */
 function trackedFiles() {
-  const output = execFileSync('git', ['ls-files', '-z'], {
-    cwd: repoRoot,
-    encoding: 'utf8',
-    maxBuffer: 32 * 1024 * 1024,
-  });
-  return output.split('\0').filter(Boolean);
+  if (explicitRoot) {
+    return walk(repoRoot, '');
+  }
+  try {
+    const output = execFileSync('git', ['ls-files', '-z'], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      maxBuffer: 32 * 1024 * 1024,
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    return output.split('\0').filter(Boolean);
+  } catch {
+    return walk(repoRoot, '');
+  }
+}
+
+function walk(absolute, relative) {
+  const found = [];
+  for (const entry of readdirSync(absolute, { withFileTypes: true })) {
+    if (SKIPPED_DIRECTORIES.has(entry.name)) continue;
+    const childRelative = relative ? `${relative}/${entry.name}` : entry.name;
+    if (entry.isDirectory()) {
+      found.push(...walk(path.join(absolute, entry.name), childRelative));
+    } else if (entry.isFile()) {
+      found.push(childRelative);
+    }
+  }
+  return found;
 }
 
 /**

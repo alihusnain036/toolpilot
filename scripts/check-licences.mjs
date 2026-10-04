@@ -23,6 +23,7 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const { init } = require('license-checker-rseidelsohn');
@@ -31,7 +32,7 @@ const { init } = require('license-checker-rseidelsohn');
  * SPDX identifiers permitted for production dependencies. Each is permissive:
  * no copyleft obligation attaches to shipping ToolPilot's static bundle.
  */
-const ALLOWED = new Set([
+export const ALLOWED = new Set([
   'MIT',
   'Apache-2.0',
   'BSD-2-Clause',
@@ -48,7 +49,7 @@ const ALLOWED = new Set([
  * the check again instead of inheriting the exemption. Each entry needs a
  * reason a reviewer can check. See docs/decisions/0003-dependency-licences.md.
  */
-const EXCEPTIONS = new Map([
+export const EXCEPTIONS = new Map([
   [
     'caniuse-lite',
     {
@@ -70,7 +71,7 @@ const EXCEPTIONS = new Map([
  * - An OR expression is satisfied if ANY branch is allowed (we may choose it).
  * - An AND expression is satisfied only if EVERY branch is allowed.
  */
-function evaluateExpression(raw) {
+export function evaluateExpression(raw) {
   const expression = String(raw ?? '')
     .replace(/^\(+|\)+$/g, '')
     .trim();
@@ -94,6 +95,22 @@ function evaluateExpression(raw) {
 
   const single = normalise(expression);
   return { ok: ALLOWED.has(single), parts: [single] };
+}
+
+/**
+ * The verdict on one package: 'allowed' when its licence is on the allow-list,
+ * 'excepted' when it is not but a recorded exception names this package at
+ * exactly this licence, 'disallowed' otherwise.
+ */
+export function verdictFor(name, licence) {
+  if (evaluateExpression(licence).ok) {
+    return { outcome: 'allowed' };
+  }
+  const exception = EXCEPTIONS.get(name);
+  if (exception && exception.licence === String(licence ?? '').trim()) {
+    return { outcome: 'excepted', reason: exception.reason };
+  }
+  return { outcome: 'disallowed' };
 }
 
 /**
@@ -225,21 +242,17 @@ async function main() {
     `Production dependency licences (${installed.length} package(s) installed, direct and transitive):\n`,
   );
   for (const entry of installed) {
-    const verdict = evaluateExpression(entry.licence);
-    const exception = EXCEPTIONS.get(entry.name);
-    const isExcepted =
-      !verdict.ok &&
-      exception !== undefined &&
-      exception.licence === entry.licence.trim();
+    const verdict = verdictFor(entry.name, entry.licence);
 
     const label = `${entry.name}@${entry.version}`.padEnd(nameWidth);
-    const mark = verdict.ok ? 'ok  ' : isExcepted ? 'note' : 'FAIL';
+    const mark = { allowed: 'ok  ', excepted: 'note', disallowed: 'FAIL' }[
+      verdict.outcome
+    ];
     console.log(`  ${mark} ${label}  ${entry.licence || '(none determined)'}`);
 
-    if (verdict.ok) continue;
-    if (isExcepted) {
-      excepted.push({ ...entry, reason: exception.reason });
-    } else {
+    if (verdict.outcome === 'excepted') {
+      excepted.push({ ...entry, reason: verdict.reason });
+    } else if (verdict.outcome === 'disallowed') {
       disallowed.push(entry);
     }
   }
@@ -295,4 +308,13 @@ async function main() {
   );
 }
 
-await main();
+// Run the check when invoked as a script; stay inert when imported, so the
+// allow-list and the expression evaluator can be unit-tested without walking
+// the whole dependency tree.
+const invokedDirectly =
+  process.argv[1] !== undefined &&
+  pathToFileURL(process.argv[1]).href === import.meta.url;
+
+if (invokedDirectly) {
+  await main();
+}

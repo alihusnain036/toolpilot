@@ -14,6 +14,8 @@ dist/
 
 # testing
 coverage/
+# fixture trees the no-backend guard's tests write and tear down
+.tmp-guard-fixtures/
 
 # local environment overrides (the committed .env holds non-secret defaults)
 .env.local
