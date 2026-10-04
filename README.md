@@ -52,7 +52,7 @@ pnpm start   # serve the production build locally
 | `pnpm build`        | **typecheck → lint → `next build`.** A build cannot succeed with a type error or a lint error |
 | `pnpm start`        | Serves the built output                                                                       |
 | `pnpm typecheck`    | `tsc --noEmit` — `strict` plus `noUncheckedIndexedAccess`                                     |
-| `pnpm lint`         | ESLint over `app/`, `src/` and `scripts/`; any error, and any warning, fails                   |
+| `pnpm lint`         | ESLint over `app/`, `src/` and `scripts/`; any error, and any warning, fails                  |
 | `pnpm test`         | Vitest once, over `app/`, `src/` and `scripts/`                                               |
 | `pnpm test:watch`   | Vitest in watch mode                                                                          |
 | `pnpm format`       | Prettier, writing changes (includes Tailwind class sorting)                                   |
