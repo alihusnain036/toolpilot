@@ -83,5 +83,9 @@ the same URL.
 
 Everything in `index.ts` is synchronous and pure: the registry is compiled into
 the static build, so there is nothing to fetch, nothing to await and nothing to
-cache. Only `validate.ts` imports zod, which is what keeps the schema out of
-the browser bundle.
+cache.
+
+`types.ts` is the one module that imports zod, and every module on the shipping
+path imports from it with `import type`, so the schema is erased at compile time
+and never reaches the browser bundle. Import a *value* from `types.ts` only in
+`validate.ts` and in tests.

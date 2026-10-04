@@ -34,10 +34,16 @@ export const TOOL_COMPONENTS: Readonly<
  * The loader for a slug, or `undefined` when none is wired up. Callers hold a
  * slug read from a route parameter, so an unknown slug answers `undefined`
  * rather than throwing.
+ *
+ * The lookup is `Object.hasOwn`-guarded rather than a bare index read: a plain
+ * object answers `'constructor'` and `'toString'` from its prototype, and a
+ * slug arriving from a route parameter must never resolve to something that is
+ * not a wired loader.
  */
 export function getToolComponentLoader(
   slug: string,
 ): ToolComponentLoader | undefined {
+  if (!Object.hasOwn(TOOL_COMPONENTS, slug)) return undefined;
   return TOOL_COMPONENTS[slug];
 }
 

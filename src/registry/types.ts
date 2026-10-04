@@ -140,9 +140,25 @@ export type ParsedToolEntry = z.infer<typeof toolEntrySchema>;
 type Assert<T extends true> = T;
 
 /**
- * Compile-time proof that the schema and the interface have not drifted apart:
- * if a field is added to one and not the other, this stops compiling.
+ * Compile-time proof that what the schema produces is a valid `ToolEntry` — so
+ * a field the schema parses more loosely than the interface declares it stops
+ * compiling.
  */
 export type SchemaMirrorsToolEntry = Assert<
   ParsedToolEntry extends ToolEntry ? true : false
+>;
+
+/**
+ * Compile-time proof that the two have exactly the same fields, in both
+ * directions: a field added to the interface and not the schema would otherwise
+ * go unvalidated, and a field added to the schema and not the interface would be
+ * unreadable. Compared by key name, because the interface's arrays are readonly
+ * and the schema's are not, which is a difference of modifier and not of field.
+ */
+export type SchemaHasEveryToolEntryField = Assert<
+  [keyof ParsedToolEntry] extends [keyof ToolEntry]
+    ? [keyof ToolEntry] extends [keyof ParsedToolEntry]
+      ? true
+      : false
+    : false
 >;
