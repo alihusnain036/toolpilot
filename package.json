@@ -18,7 +18,8 @@
     "test:watch": "vitest",
     "guard": "node scripts/guard-no-backend.mjs",
     "licences": "node scripts/check-licences.mjs",
-    "build": "pnpm run typecheck && pnpm run lint && next build",
+    "validate:registry": "vitest run src/registry/registry-is-valid.test.ts",
+    "build": "pnpm run validate:registry && pnpm run typecheck && pnpm run lint && next build",
     "start": "next start"
   },
   "dependencies": {

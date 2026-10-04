@@ -45,7 +45,7 @@ pnpm start   # serve the production build locally
 | Command             | What it does                                                                                  |
 | ------------------- | --------------------------------------------------------------------------------------------- |
 | `pnpm dev`          | Development server with hot reload                                                            |
-| `pnpm build`        | **typecheck → lint → `next build`.** A build cannot succeed with a type error or a lint error |
+| `pnpm build`        | **validate:registry → typecheck → lint → `next build`.** A build cannot succeed with an invalid registry, a type error or a lint error |
 | `pnpm start`        | Serves the built output                                                                       |
 | `pnpm typecheck`    | `tsc --noEmit` — `strict` plus `noUncheckedIndexedAccess`                                     |
 | `pnpm lint`         | ESLint; any error, and any warning, fails                                                     |
@@ -53,6 +53,7 @@ pnpm start   # serve the production build locally
 | `pnpm test:watch`   | Vitest in watch mode                                                                          |
 | `pnpm format`       | Prettier, writing changes (includes Tailwind class sorting)                                   |
 | `pnpm format:check` | Prettier, checking only                                                                       |
+| `pnpm validate:registry` | Build-time validation of the tool registry — see `src/registry/README.md`                |
 | `pnpm guard`        | The no-backend guard — see below                                                              |
 | `pnpm licences`     | Lists every production dependency's licence and fails on a copyleft one                       |
 
@@ -65,8 +66,11 @@ build on every pull request and on every push to `main`. All of them must pass.
 app/                    Routes. Everything here is prerendered at build time.
   layout.tsx            Root layout: fonts, metadata, <html>/<body>
   globals.css           The design tokens live here
+  tools/[slug]/         One prerendered page per published tool
+  category/[slug]/      One page per category
 src/
   config/env.ts         The one environment variable, validated with zod
+  registry/             The tool registry — the one source of truth for tools
 scripts/
   guard-no-backend.mjs  Fails the build if a backend appears
   check-licences.mjs    Fails the build on a non-permissive licence
