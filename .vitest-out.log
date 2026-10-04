@@ -1,0 +1,5 @@
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+ RUN  v2.1.3 /tmp/orbis-turns/code/a3aebf8e-09ca-400b-9aec-36e2c2d71bff
+
+ ✓ src/config/env.test.ts  (11 tests) 7ms
