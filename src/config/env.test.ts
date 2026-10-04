@@ -1,0 +1,82 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { parseEnv } from './env';
+
+describe('parseEnv', () => {
+  it('parses a valid absolute https URL', () => {
+    const result = parseEnv({ NEXT_PUBLIC_SITE_URL: 'https://toolpilot.app' });
+    expect(result.NEXT_PUBLIC_SITE_URL).toBe('https://toolpilot.app');
+  });
+
+  it('accepts an http localhost URL for local development', () => {
+    const result = parseEnv({ NEXT_PUBLIC_SITE_URL: 'http://localhost:3000' });
+    expect(result.NEXT_PUBLIC_SITE_URL).toBe('http://localhost:3000');
+  });
+
+  it('strips trailing slashes so callers can concatenate paths safely', () => {
+    const result = parseEnv({ NEXT_PUBLIC_SITE_URL: 'https://toolpilot.app//' });
+    expect(result.NEXT_PUBLIC_SITE_URL).toBe('https://toolpilot.app');
+  });
+
+  it('throws when NEXT_PUBLIC_SITE_URL is absent', () => {
+    expect(() => parseEnv({})).toThrowError(/NEXT_PUBLIC_SITE_URL is required/);
+  });
+
+  it('throws when NEXT_PUBLIC_SITE_URL is an empty string', () => {
+    expect(() => parseEnv({ NEXT_PUBLIC_SITE_URL: '' })).toThrowError(
+      /NEXT_PUBLIC_SITE_URL/,
+    );
+  });
+
+  it('throws when NEXT_PUBLIC_SITE_URL is not an absolute URL', () => {
+    expect(() => parseEnv({ NEXT_PUBLIC_SITE_URL: 'toolpilot.app' })).toThrowError(
+      /must be an absolute URL/,
+    );
+  });
+
+  it('throws when NEXT_PUBLIC_SITE_URL uses an unsupported protocol', () => {
+    expect(() =>
+      parseEnv({ NEXT_PUBLIC_SITE_URL: 'ftp://toolpilot.app' }),
+    ).toThrowError(/must use http or https/);
+  });
+
+  it('throws when NEXT_PUBLIC_SITE_URL is not a string', () => {
+    expect(() => parseEnv({ NEXT_PUBLIC_SITE_URL: 42 })).toThrowError(
+      /must be a string/,
+    );
+  });
+
+  it('reports the variable name in the error so the failure is actionable', () => {
+    expect(() => parseEnv({})).toThrowError(/Invalid environment configuration/);
+  });
+});
+
+describe('env module load', () => {
+  const original = process.env.NEXT_PUBLIC_SITE_URL;
+
+  afterEach(() => {
+    if (original === undefined) {
+      delete process.env.NEXT_PUBLIC_SITE_URL;
+    } else {
+      process.env.NEXT_PUBLIC_SITE_URL = original;
+    }
+    vi.resetModules();
+  });
+
+  it('throws on import when NEXT_PUBLIC_SITE_URL is absent', async () => {
+    delete process.env.NEXT_PUBLIC_SITE_URL;
+    vi.resetModules();
+
+    await expect(import('./env')).rejects.toThrowError(
+      /NEXT_PUBLIC_SITE_URL is required/,
+    );
+  });
+
+  it('exposes siteUrl when NEXT_PUBLIC_SITE_URL is valid', async () => {
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://preview.toolpilot.app/';
+    vi.resetModules();
+
+    const mod = await import('./env');
+    expect(mod.siteUrl).toBe('https://preview.toolpilot.app');
+  });
+});

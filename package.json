@@ -1,0 +1,56 @@
+{
+  "name": "toolpilot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ToolPilot — a statically generated collection of browser-only online tools.",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=20.0.0 <21"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "typecheck": "tsc --noEmit",
+    "lint": "next lint --max-warnings=0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "guard": "node scripts/guard-no-backend.mjs",
+    "licences": "node scripts/check-licences.mjs",
+    "build": "pnpm run typecheck && pnpm run lint && next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "14.2.15",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zod": "3.23.8"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "10.4.0",
+    "@testing-library/jest-dom": "6.5.0",
+    "@testing-library/react": "16.0.1",
+    "@testing-library/user-event": "14.5.2",
+    "@types/jest-axe": "3.5.9",
+    "@types/node": "20.16.11",
+    "@types/react": "18.3.11",
+    "@types/react-dom": "18.3.1",
+    "@typescript-eslint/eslint-plugin": "7.18.0",
+    "@typescript-eslint/parser": "7.18.0",
+    "@vitejs/plugin-react": "4.3.2",
+    "autoprefixer": "10.4.20",
+    "eslint": "8.57.1",
+    "eslint-config-next": "14.2.15",
+    "eslint-config-prettier": "9.1.0",
+    "jest-axe": "9.0.0",
+    "jsdom": "25.0.1",
+    "license-checker-rseidelsohn": "4.3.0",
+    "postcss": "8.4.47",
+    "prettier": "3.3.3",
+    "prettier-plugin-tailwindcss": "0.6.8",
+    "tailwindcss": "3.4.13",
+    "typescript": "5.6.3",
+    "vitest": "2.1.3"
+  }
+}

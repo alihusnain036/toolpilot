@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * ToolPilot design tokens.
+ *
+ * One token set, two value sets: `:root` carries the light values and `.dark`
+ * overrides the same names. Tailwind reads these through
+ * tailwind.config.ts, so `bg-background` / `text-foreground` are correct in
+ * both themes without a `dark:` variant.
+ *
+ * Colours are stored as bare HSL channels ("222 47% 11%") so Tailwind can
+ * apply opacity modifiers such as `bg-primary/10`.
+ */
+
+@layer base {
+  :root {
+    /* ---- Colour: light ---- */
+    --color-background: 0 0% 100%;
+    --color-foreground: 222 47% 11%;
+
+    --color-card: 0 0% 100%;
+    --color-card-foreground: 222 47% 11%;
+
+    --color-muted: 210 40% 96%;
+    --color-muted-foreground: 215 16% 47%;
+
+    --color-border: 214 32% 91%;
+    --color-input: 214 32% 91%;
+    --color-ring: 221 83% 53%;
+
+    --color-primary: 221 83% 53%;
+    --color-primary-foreground: 210 40% 98%;
+
+    --color-accent: 210 40% 96%;
+    --color-accent-foreground: 222 47% 11%;
+
+    --color-success: 142 71% 45%;
+    --color-success-foreground: 210 40% 98%;
+
+    --color-warning: 38 92% 50%;
+    --color-warning-foreground: 222 47% 11%;
+
+    --color-destructive: 0 72% 51%;
+    --color-destructive-foreground: 210 40% 98%;
+
+    /* ---- Radius ---- */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
+
+    /* ---- Spacing (named steps; Tailwind's numeric scale stays available) ---- */
+    --space-gutter: 1rem;
+    --space-stack: 1.5rem;
+    --space-section: 4rem;
+
+    /* ---- Type scale ---- */
+    --text-xs: 0.75rem;
+    --leading-xs: 1rem;
+    --text-sm: 0.875rem;
+    --leading-sm: 1.25rem;
+    --text-base: 1rem;
+    --leading-base: 1.5rem;
+    --text-lg: 1.125rem;
+    --leading-lg: 1.75rem;
+    --text-xl: 1.25rem;
+    --leading-xl: 1.75rem;
+    --text-2xl: 1.5rem;
+    --leading-2xl: 2rem;
+    --text-3xl: 1.875rem;
+    --leading-3xl: 2.25rem;
+    --text-4xl: 2.25rem;
+    --leading-4xl: 2.5rem;
+
+    /* ---- Layout widths ---- */
+    --width-content: 80rem;
+    --width-prose: 44rem;
+  }
+
+  .dark {
+    /* ---- Colour: dark (same token names, different values) ---- */
+    --color-background: 222 47% 11%;
+    --color-foreground: 210 40% 98%;
+
+    --color-card: 217 33% 17%;
+    --color-card-foreground: 210 40% 98%;
+
+    --color-muted: 217 33% 17%;
+    --color-muted-foreground: 215 20% 65%;
+
+    --color-border: 217 33% 24%;
+    --color-input: 217 33% 24%;
+    --color-ring: 217 91% 60%;
+
+    --color-primary: 217 91% 60%;
+    --color-primary-foreground: 222 47% 11%;
+
+    --color-accent: 217 33% 17%;
+    --color-accent-foreground: 210 40% 98%;
+
+    --color-success: 142 69% 58%;
+    --color-success-foreground: 222 47% 11%;
+
+    --color-warning: 48 96% 53%;
+    --color-warning-foreground: 222 47% 11%;
+
+    --color-destructive: 0 84% 60%;
+    --color-destructive-foreground: 210 40% 98%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    /* Theme switching lands in the site-shell ticket; the token set is ready. */
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  :focus-visible {
+    @apply ring-ring outline-none ring-2 ring-offset-2;
+    --tw-ring-offset-color: hsl(var(--color-background));
+  }
+}
