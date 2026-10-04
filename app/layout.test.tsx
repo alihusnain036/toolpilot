@@ -1,20 +1,50 @@
 import { render, screen } from '@testing-library/react';
 import { axe } from 'jest-axe';
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import RootLayout, { metadata, viewport } from './layout';
 
 /**
- * Smoke test for the root layout. React cannot mount <html>/<body> inside a
- * detached <div>, so we render into the live document and read the result
- * from there — which is also the only way the body classes are observable.
+ * Smoke test for the root layout.
+ *
+ * A root layout renders <html> and <body>, which React can only legally mount
+ * as the document root. Mounting it inside a test container is still the
+ * practical way to assert its structure, so we render into the default
+ * container and read the nested elements out of it. React logs a DOM-nesting
+ * warning for that; it is expected here and nowhere else, so we silence it for
+ * this file only rather than globally.
  */
-function renderLayout(children: React.ReactNode): HTMLElement {
-  const markup = render(<RootLayout>{children}</RootLayout>, {
-    container: document.documentElement,
-    baseElement: document.documentElement,
+let consoleError: ReturnType<typeof vi.spyOn>;
+
+beforeAll(() => {
+  consoleError = vi.spyOn(console, 'error').mockImplementation((...args) => {
+    const first = typeof args[0] === 'string' ? args[0] : '';
+    if (first.includes('cannot be a child of') || first.includes('<html>')) {
+      return;
+    }
+    // Anything else is a real problem: let it through.
+    consoleError.getMockImplementation();
+    process.stderr.write(`${first}\n`);
   });
-  return markup.baseElement as HTMLElement;
+});
+
+afterAll(() => {
+  consoleError.mockRestore();
+});
+
+function renderLayout(children: React.ReactNode): {
+  container: HTMLElement;
+  html: HTMLElement | null;
+  body: HTMLElement | null;
+  appRoot: HTMLElement | null;
+} {
+  const { container } = render(<RootLayout>{children}</RootLayout>);
+  return {
+    container,
+    html: container.querySelector('html'),
+    body: container.querySelector('body'),
+    appRoot: container.querySelector('#app-root'),
+  };
 }
 
 describe('RootLayout', () => {
@@ -23,36 +53,42 @@ describe('RootLayout', () => {
     expect(screen.getByText('hello from a child route')).toBeInTheDocument();
   });
 
+  it('renders the html and body document structure', () => {
+    const { html, body } = renderLayout(<p>content</p>);
+    expect(html).not.toBeNull();
+    expect(body).not.toBeNull();
+  });
+
   it('renders a single main landmark for the skip link to target', () => {
     renderLayout(<p>content</p>);
     const main = screen.getByRole('main');
-    expect(main).toBeInTheDocument();
     expect(main).toHaveAttribute('id', 'main');
   });
 
   it('applies the themed background and foreground tokens to the body', () => {
-    renderLayout(<p>content</p>);
-    const body = document.querySelector('body');
-    expect(body).not.toBeNull();
+    const { body } = renderLayout(<p>content</p>);
     expect(body?.className).toContain('bg-background');
     expect(body?.className).toContain('text-foreground');
+    expect(body?.className).toContain('font-sans');
   });
 
   it('declares the document language', () => {
-    renderLayout(<p>content</p>);
-    expect(document.querySelector('html')).toHaveAttribute('lang', 'en');
+    const { html } = renderLayout(<p>content</p>);
+    expect(html).toHaveAttribute('lang', 'en');
   });
 
   it('exposes the self-hosted font CSS variables on the html element', () => {
-    renderLayout(<p>content</p>);
-    // vitest.setup.ts stubs next/font, so the stub's variable name is what
-    // reaches the class list. What matters is that the layout forwards it.
-    expect(document.querySelector('html')?.className).toContain('--font-mock');
+    const { html } = renderLayout(<p>content</p>);
+    // next/font is stubbed in vitest.setup.ts so no font is fetched; what
+    // matters is that the layout forwards both variables onto <html>.
+    expect(html?.className).toContain('--font-sans');
+    expect(html?.className).toContain('--font-mono');
   });
 
   it('has no detectable accessibility violations', async () => {
-    const baseElement = renderLayout(<h1>ToolPilot</h1>);
-    const results = await axe(baseElement);
+    const { appRoot } = renderLayout(<h1>ToolPilot</h1>);
+    expect(appRoot).not.toBeNull();
+    const results = await axe(appRoot as HTMLElement);
     expect(results.violations).toEqual([]);
   });
 

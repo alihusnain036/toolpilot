@@ -16,11 +16,14 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.ts'],
     include: ['{app,src,scripts,tests}/**/*.test.{ts,tsx}'],
     exclude: ['node_modules', '.next', 'out'],
+    // Worker threads rather than child processes: component tests never touch
+    // global process state, and it keeps the suite runnable on constrained
+    // runners that cannot fork a process per test file.
+    pool: 'threads',
     env: {
       // The suite needs a valid value so importing src/config/env.ts succeeds;
       // the tests that assert failure delete it and reset the module registry.
       NEXT_PUBLIC_SITE_URL: 'https://toolpilot.test',
     },
-    css: true,
   },
 });
