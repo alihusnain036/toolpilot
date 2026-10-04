@@ -19,8 +19,8 @@ import type { ToolEntry } from './types';
  * build, so there is nothing to fetch and nothing to cache.
  */
 
-export type { Category, CategoryDefinition } from './categories';
-export type { InputKind, ToolEntry } from './types';
+export type { Category, CategoryDefinition, ToolEntry };
+export type { InputKind } from './types';
 export type { ToolSlug } from './tools';
 export type { ToolComponentLoader } from './components';
 export { getToolComponentLoader } from './components';

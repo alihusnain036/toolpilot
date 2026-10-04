@@ -23,7 +23,7 @@ import { toolEntrySchema } from './types';
  * tools at once sees all three mistakes in one run.
  *
  * Entries arrive as `unknown` on purpose. The committed registry is
- * type-checked, but the tests feed this malformed entries, and an entry read
+ * type-checked, but the tests feed it malformed entries, and an entry read
  * from a future JSON source would be unknown too.
  */
 
