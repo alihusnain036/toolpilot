@@ -222,23 +222,28 @@ const SKIPPED_DIRECTORIES = new Set([
  * Every file the guard should look at, as repo-relative POSIX paths.
  *
  * `git ls-files` is the right answer for a checkout: it sees exactly what would
- * be pushed and ignores build output. An explicitly named root is walked
- * instead — it may be a fixture tree or an exported tarball with no index of
- * its own, and inheriting the surrounding repository's file list would be
- * wrong. The same walk is the fallback when git is unavailable.
+ * be pushed and ignores build output. `--others --exclude-standard` includes
+ * files that are new and not yet staged, so a developer running `pnpm guard`
+ * before committing gets the same answer CI will give them afterwards; ignored
+ * paths stay out either way.
+ *
+ * An explicitly named root is walked instead — it may be a fixture tree or an
+ * exported tarball with no index of its own, and inheriting the surrounding
+ * repository's file list would be wrong. The same walk is the fallback when git
+ * is unavailable.
  */
 function trackedFiles() {
   if (explicitRoot) {
     return walk(repoRoot, '');
   }
   try {
-    const output = execFileSync('git', ['ls-files', '-z'], {
+    const output = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z'], {
       cwd: repoRoot,
       encoding: 'utf8',
       maxBuffer: 32 * 1024 * 1024,
       stdio: ['ignore', 'pipe', 'ignore'],
     });
-    return output.split('\0').filter(Boolean);
+    return [...new Set(output.split('\0').filter(Boolean))];
   } catch {
     return walk(repoRoot, '');
   }

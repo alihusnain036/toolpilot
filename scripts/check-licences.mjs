@@ -26,7 +26,18 @@ import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 
 const require = createRequire(import.meta.url);
-const { init } = require('license-checker-rseidelsohn');
+
+/**
+ * license-checker is loaded on first use rather than at import time: the
+ * allow-list and the expression evaluator below are unit-tested by importing
+ * this module, and those tests should not have to load a package that walks
+ * the filesystem.
+ */
+let cachedInit;
+function licenseChecker() {
+  cachedInit ??= require('license-checker-rseidelsohn').init;
+  return cachedInit;
+}
 
 /**
  * SPDX identifiers permitted for production dependencies. Each is permissive:
@@ -175,7 +186,7 @@ function readLicence(packageDir) {
       resolve({ licence: '', repository: '' });
       return;
     }
-    init(
+    licenseChecker()(
       {
         start: packageDir,
         direct: 0,
